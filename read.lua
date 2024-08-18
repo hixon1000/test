@@ -1,19 +1,13 @@
+local dfpwm = require("cc.audio.dfpwm")
 local function play_sound(file_path)
     local speaker = peripheral.find("speaker")
-    if speaker then
-        local file = fs.open(file_path, "r")
-        if file then
-            local data = file.readAll()
-            file.close()
-            
-            -- Play the sound data
-            speaker.playSound(data)
-            print("Playing sound from " .. file_path)
-        else
-            print("File not found: " .. file_path)
+
+    local decoder = dfpwm.make_decoder()
+    for chunk in io.lines(file_path, 16 * 1024) do
+        local buffer = decoder(chunk)
+        while not speaker.playAudio(buffer) do
+            os.pullEvent("speaker_audio_empty")
         end
-    else
-        print("No speaker found.")
     end
 end
 play_sound("/disk/chunk_aa")
