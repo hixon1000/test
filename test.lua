@@ -4,11 +4,9 @@ local totalSize = 1900 * 1024 -- Total size of the file (2 MB in this example)
 local folderMap = {}
 for i=1,18 do folderMap[i] = "disk" .. tostring(i+1) end
 
-
 local function downloadChunk(startByte, endByte, chunkNum)
-    local response = http.get(url, {
-        ["Range"] = "bytes=" .. startByte .. "-" .. endByte
-    })
+    local headers = {["Range"] = "bytes=" .. startByte .. "-" .. endByte}
+    local response = http.get(url, headers)
 
     if response then
         local folderName = folderMap[chunkNum]
@@ -19,14 +17,15 @@ local function downloadChunk(startByte, endByte, chunkNum)
             
             if file then
                 local bytesRead = 0
+                local data
                 repeat
-                    local data = response.read(chunkSize)
+                    data = response.read(chunkSize)
                     if data then
                         file.write(data)
                         bytesRead = bytesRead + #data
                     end
                 until not data or bytesRead >= (endByte - startByte + 1)
-
+                
                 file.close()
                 print("Chunk " .. chunkNum .. " saved successfully.")
             else
