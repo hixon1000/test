@@ -1,14 +1,20 @@
 local dfpwm = require("cc.audio.dfpwm")
 
 local function play_sound(file_path)
-    local speakers = table.pack(peripheral.find("speaker"))
+    -- Find all speakers
+    local all_speakers = table.pack(peripheral.find("speaker"))
+    
+    -- Select only the first two unique speakers
+    local speakers = table.pack(all_speakers[1], all_speakers[2])
     local decoder = dfpwm.make_decoder()
 
-    -- Verify speakers
+    -- Verify the speakers being used
+    print("Number of speakers used: " .. speakers.n)
     for i = 1, speakers.n do
         print("Speaker " .. i .. ": " .. tostring(speakers[i]))
     end
 
+    -- Play sound through the selected speakers
     for chunk in io.lines(file_path, 16 * 1024) do
         local buffer = decoder(chunk)
         local funcs = {}
@@ -21,7 +27,7 @@ local function play_sound(file_path)
             end
         end
 
-        -- Test initialization and playback
+        -- Ensure synchronization across the selected speakers
         parallel.waitForAll(table.unpack(funcs, 1, speakers.n))
     end
 end
