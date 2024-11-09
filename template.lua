@@ -35,5 +35,5 @@ end
 
 
 -- Example usage:
-play_sound("disk/bad_aa")
+play_sound("disk/bad_ab")
 
